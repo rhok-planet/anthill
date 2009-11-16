@@ -3,7 +3,7 @@ from django.views.generic import simple, date_based, list_detail
 from django.template import RequestContext
 from django.shortcuts import get_object_or_404, render_to_response, redirect
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseNotAllowed
+from django.http import HttpResponseForbidden
 from anthill.events.models import Event, Attendance
 from anthill.events.forms import EventForm, SearchForm, AttendForm
 
@@ -53,7 +53,7 @@ def event_detail(request, event_id):
 @login_required
 def edit_event(request, event_id):
     event = get_object_or_404(Event, pk=event_id)
-    if event.creator != request.user:
+    if event.creator != request.user and not request.user.is_staff:
         return HttpResponseForbidden('Only the creator of an event may edit it.')
 
     if request.method == 'POST':
