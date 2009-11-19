@@ -3,6 +3,3 @@
 django-tagging==0.3
 -e git://github.com/sunlightlabs/django-brainstorm.git#egg=django-brainstorm
 -e git://github.com/sunlightlabs/django-feedinator.git#egg=django-feedinator
-
--e git://github.com/sunlightlabs/labssite-apps.git#egg=labssite-apps
-
