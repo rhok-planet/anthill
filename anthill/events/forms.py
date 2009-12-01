@@ -37,7 +37,7 @@ class EventForm(forms.ModelForm):
         model = Event
         fields = ['title', 'description', 'location', 'url', 'start_date', 'end_date', 'related_projects']
 
-    location = forms.CharField(label='Address')
+    location = forms.CharField(label='Address', max_length=100)
     start_date = SplitDateOptionalTimeField(widget=SplitDateTimeListWidget, required=False)
     end_date = SplitDateOptionalTimeField(widget=SplitDateTimeListWidget, required=False)
 
