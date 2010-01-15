@@ -4,6 +4,9 @@ from django.contrib.contenttypes.models import ContentType
 from tagging.models import Tag
 
 class SimpleItemsNode(template.Node):
+    """
+        Node that given a queryset and varname will set a template variable.
+    """
     def __init__(self, queryset, count, offset, varname):
         self.items = queryset[offset:count+offset]
         self.varname = varname
@@ -13,6 +16,10 @@ class SimpleItemsNode(template.Node):
         return ''
 
 def get_items_as_tag(token, queryset, count=5):
+    """
+        Handler for common 'get items' templatetags
+        format: {% get_whatever [count [offset]] as varname %}
+    """
     pieces = token.contents.split()
     as_index = pieces.index('as')
     if as_index == -1 or as_index > 3 or len(pieces) != as_index+2:
@@ -34,7 +41,10 @@ def get_items_as_tag(token, queryset, count=5):
 ## google charts ##
 
 class ChartNode(template.Node):
+    """ Simple node for generating google chart API calls """
+
     def __init__(self, items, width=150, height=150, chart_type='bhs'):
+        # items a list of {num,name,color} dicts
         nums = []
         snums = []
         names = []
@@ -54,6 +64,7 @@ class ChartNode(template.Node):
         return '<img src="%s" />' % self.img_url
 
 def _extract_chart_params(token, width=150, height=150):
+    """ Check if width/height were included as first chart param (eg. 250x300) """
     pieces = token.contents.split()
     args = pieces[1:]
     if ':' not in args[0] and 'x' in args[0]:
@@ -64,6 +75,12 @@ def _extract_chart_params(token, width=150, height=150):
     return width, height, args
 
 def chart_from_tags(model, token):
+    """
+        Given a model generate a chart based on the popularity of its tags.
+
+        Tags should be passed in a tagname:hexcolor format
+    """
+
     width, height, args = _extract_chart_params(token)
     tags = dict(arg.split(':') for arg in args)
     ct = ContentType.objects.get_for_model(model).id
