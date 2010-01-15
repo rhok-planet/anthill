@@ -2,15 +2,28 @@ from django.conf import settings
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import Point
 from django.contrib.gis.measure import D
-from geopy import geocoders
+from django.utils import simplejson
+import urllib
 
 def _geocode(location):
-    geocoder = geocoders.Google(settings.GMAPS_API_KEY)
-    locations = list(geocoder.geocode(location, exactly_one=False))
-    if locations:
-        point = locations[0][1]
-        return Point(*point), locations[0][0]
-    else:
+    params = {
+     'q': location,
+     'key': settings.ANTHILL_GMAPS_KEY,
+     'sensor': 'false',
+     'output': 'json',
+    }
+    url = 'http://maps.google.com/maps/geo?%s' % urllib.urlencode(params)
+
+    try:
+        resp = urllib.urlopen(url).read()
+        resp = simplejson.loads(resp)
+        if resp['Status']['code'] == 200:
+            pmark = resp['Placemark'][0]
+            lon,lat = pmark['Point']['coordinates'][0:2]
+            return Point(lat, lon), pmark['address']
+        else:
+            return None, None
+    except:
         return None, None
 
 class LocationModelQuerySet(models.query.GeoQuerySet):

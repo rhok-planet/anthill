@@ -33,7 +33,7 @@ def static_google_map(person, width=200, height=200, zoom=12):
     base_url = 'http://maps.google.com/staticmap?&sensor=false&key=%(key)s&markers=%(lat)s,%(long)s&zoom=%(zoom)s&size=%(width)sx%(height)s'
     return base_url % {'lat':person.lat_long.x, 'long':person.lat_long.y,
                        'width': width, 'height': height, 'zoom': zoom,
-                       'key': settings.GMAPS_API_KEY}
+                       'key': settings.ANTHILL_GMAPS_KEY}
 
 @register.tag
 def people_skills_piechart(parser, token):

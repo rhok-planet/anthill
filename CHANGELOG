@@ -8,6 +8,7 @@ anthill changelog
     - fix event default ordering
     - improvements to internal messaging system including message_sent signal
     - improvements to Event including optional times and related_projects
+    - pruned unnecessary dependencies
 
 0.1.0 - August 31 2009
 =======================
