@@ -13,7 +13,7 @@ class SearchForm(forms.Form):
     location = forms.CharField(required=False)
     skills = forms.CharField(required=False)
     name = forms.CharField(required=False)
-    position = forms.ChoiceField(label='Position', 
+    position = forms.ChoiceField(label='Position',
                                  choices=(('','-------'),)+ROLES,
                                  required=False)
     location_range = forms.ChoiceField(choices=DISTANCE_CHOICES, initial='50',
@@ -38,9 +38,9 @@ class ProfileForm(forms.Form):
     about = forms.CharField(widget=MarkupTextarea, label='About You', required=False)
 
 class PasswordForm(forms.Form):
-    password1 = forms.CharField(label='Password', 
+    password1 = forms.CharField(label='Password',
                                 widget=forms.widgets.PasswordInput)
-    password2 = forms.CharField(label='Confirm Password', 
+    password2 = forms.CharField(label='Confirm Password',
                                 widget=forms.widgets.PasswordInput)
 
     def clean(self):

@@ -11,6 +11,16 @@ from anthill.people.forms import SearchForm, ProfileForm, PasswordForm, UserCont
 from anthill.people.signals import message_sent
 
 def search(request):
+    """
+        Location-based search for users.
+
+        Template: people/search.html
+
+        Context:
+            form           - ``anthill.people.forms.SearchForm`` instance
+            searched       - flag indicating if search has taken place
+            search_results - list of search results (may be empty)
+    """
     context = { 'form': SearchForm() }
 
     if request.GET:
@@ -39,11 +49,20 @@ def search(request):
                              context_instance=RequestContext(request))
 
 def profile(request, username):
+    """
+        Simple view of user profile.
+
+        Template: people/profile.html
+
+        Context:
+            p_user - user to display profile of
+    """
     user = get_object_or_404(User, username=username)
-    return render_to_response('people/profile.html', {'p_user':user}, 
+    return render_to_response('people/profile.html', {'p_user':user},
                              context_instance=RequestContext(request))
 
 def _user_to_profileform(user):
+    """ helper method to convert User/Profile to a populated ProfileForm """
     profile = user.profile
     data = {'name': user.first_name,
             'email': user.email,
@@ -57,6 +76,15 @@ def _user_to_profileform(user):
 
 @login_required
 def edit_profile(request):
+    """
+        Edit profile (and User details) of logged in user.
+
+        Template: people/edit_profile.html
+
+        Context:
+            form          - ``ProfileForm``
+            password_form - ``anthill.people.forms.PasswordForm``
+    """
     password_form = PasswordForm()
 
     if request.method == 'POST':
@@ -84,6 +112,9 @@ def edit_profile(request):
 @login_required
 @require_POST
 def change_password(request):
+    """
+        POST endpoint that validates password and redirects to edit_profile
+    """
     user = request.user
     password_form = PasswordForm(request.POST)
     form = _user_to_profileform(user)
@@ -98,6 +129,15 @@ def change_password(request):
 
 @login_required
 def contact(request, username):
+    """
+        Contact a user, sending them an email.
+
+        Template: people/contact.html
+
+        Context:
+            form    - ``anthill.people.forms.ContactForm``
+            to_user - user that the message is being sent to
+    """
     to_user = get_object_or_404(User, username=username)
 
     # only users with a valid email can send email

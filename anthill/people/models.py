@@ -7,20 +7,16 @@ from tagging.fields import TagField
 from markupfield.fields import MarkupField
 from anthill.models import LocationModel
 
-ROLES = (
-    ('other', 'Community Member'),
-    ('des', 'Designer'),
-    ('dev', 'Developer'),
-    ('both', 'Developer/Designer'),
-)
 
-MESSAGE_WAIT_PERIOD = 2
-INITIAL_MAX_MESSAGES = 100
+ROLES = settings.ANTHILL_ROLES
+DEFAULT_MARKUP = settings.ANTHILL_DEFAULT_MARKUP
+MESSAGE_WAIT_PERIOD = getattr(settings, 'ANTHILL_MESSAGE_WAIT', 60)
+INITIAL_MAX_MESSAGES = getattr(settings, 'ANTHILL_MESSAGE_MAX', 100)
 
 class Profile(LocationModel):
     user = models.OneToOneField(User, related_name='profile')
     url = models.URLField(blank=True)
-    about = MarkupField(blank=True, default_markup_type=settings.ANTHILL_DEFAULT_MARKUP)
+    about = MarkupField(blank=True, default_markup_type=DEFAULT_MARKUP)
     role = models.CharField(max_length=5, choices=ROLES, default='other')
     twitter_id = models.CharField(max_length=15, blank=True)
     skills = TagField('comma separated list of your skills (eg. python, django)')
@@ -36,6 +32,7 @@ class Profile(LocationModel):
         return unicode(self.user)
 
     def can_send_email(self):
+        """ Rate limit emails by time and in total """
         if self.last_email_sent:
             elapsed = datetime.datetime.now() - self.last_email_sent
         else:
@@ -48,6 +45,7 @@ class Profile(LocationModel):
         self.num_emails_sent += 1
         self.save()
 
+# signal fired on new user creation to automatically create Profile
 def create_profile(sender, instance, created, **kwargs):
     if created:
         Profile.objects.create(user=instance)
