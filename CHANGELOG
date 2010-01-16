@@ -2,8 +2,14 @@
 anthill changelog
 =================
 
-0.2.0 -
-======================
+0.3.0
+============================
+    - documented views (templates required/context variables)
+    - standardized settings
+    - removed dependency on geopy
+
+0.2.0 - December 1 2009
+=======================
     - set default link_type on project links
     - fix event default ordering
     - improvements to internal messaging system including message_sent signal

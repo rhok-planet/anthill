@@ -7,7 +7,6 @@ from tagging.fields import TagField
 from markupfield.fields import MarkupField
 from anthill.models import LocationModel
 
-
 ROLES = settings.ANTHILL_ROLES
 DEFAULT_MARKUP = settings.ANTHILL_DEFAULT_MARKUP
 MESSAGE_WAIT_PERIOD = getattr(settings, 'ANTHILL_MESSAGE_WAIT', 60)
