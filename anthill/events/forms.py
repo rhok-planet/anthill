@@ -16,11 +16,17 @@ class SearchForm(forms.Form):
                                        required=False)
 
 class SplitDateTimeListWidget(forms.widgets.SplitDateTimeWidget):
+    """
+        Widget to display separate date/time fields.
+    """
     def format_output(self, rendered_widgets):
         return '<li><label>Date</label>%s</li><li><label>Time</label>%s</li>' % (rendered_widgets[0],
                                                                                  rendered_widgets[1])
 
 class SplitDateOptionalTimeField(forms.SplitDateTimeField):
+    """
+        SplitDateTimeField that validates if time is missing
+    """
     def compress(self, data_list):
         if data_list:
             # Raise a validation error if time or date is empty
@@ -35,7 +41,8 @@ class SplitDateOptionalTimeField(forms.SplitDateTimeField):
 class EventForm(forms.ModelForm):
     class Meta:
         model = Event
-        fields = ['title', 'description', 'location', 'url', 'start_date', 'end_date', 'related_projects']
+        fields = ['title', 'description', 'location', 'url', 'start_date',
+                  'end_date', 'related_projects']
 
     location = forms.CharField(label='Address', max_length=100)
     start_date = SplitDateOptionalTimeField(widget=SplitDateTimeListWidget, required=False)

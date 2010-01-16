@@ -9,6 +9,8 @@ from anthill.projects.models import Project
 from markupfield.fields import MarkupField
 
 class EventManager(LocationModelManager):
+    """ Manager which allows easy lookup of events in the future """
+
     def future(self):
         now = datetime.datetime.now()
         return self.filter(Q(start_date__gt=now)|Q(end_date__gt=now))

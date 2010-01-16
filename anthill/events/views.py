@@ -8,6 +8,17 @@ from anthill.events.models import Event, Attendance
 from anthill.events.forms import EventForm, SearchForm, AttendForm
 
 def search(request):
+    """
+        Display search form/results for events (using distance-based search).
+
+        Template: events/search.html
+
+        Context:
+            form           - ``anthill.events.forms.SearchForm``
+            event_list     - events in the near future
+            searched       - True/False based on if a search was done
+            search_results - list of results (may be empty)
+    """
     upcoming_events = Event.objects.future().select_related()[0:5]
     if request.GET:
         form = SearchForm(request.GET)
@@ -31,6 +42,16 @@ def search(request):
                               context_instance=RequestContext(request))
 
 def event_detail(request, event_id):
+    """
+        Detail page for individual events, displays information / allows RSVP.
+
+        Template: events/event_detail.html
+
+        Context:
+            event - the ``Event`` object
+            form  - ``anthill.events.forms.AttendForm`` instance
+            finished - boolean flag indicating if event is in the past
+    """
     event = get_object_or_404(Event, pk=event_id)
     now = datetime.now()
     if event.end_date:
@@ -52,6 +73,17 @@ def event_detail(request, event_id):
 
 @login_required
 def edit_event(request, event_id):
+    """
+        Edit an already existing event.
+
+        Requires editor to be the creator or staff.
+
+        Template: events/edit_event.html
+
+        Context:
+            form  - ``EventForm`` with the editable details
+            event - ``Event`` with current details of event being edited
+    """
     event = get_object_or_404(Event, pk=event_id)
     if event.creator != request.user and not request.user.is_staff:
         return HttpResponseForbidden('Only the creator of an event may edit it.')
@@ -70,6 +102,15 @@ def edit_event(request, event_id):
 
 @login_required
 def new_event(request):
+    """
+        Create a new event.
+
+        Template:
+            events/edit_event.html
+
+        Context:
+            form - ``EventForm`` for creating a new event
+    """
     if request.method == 'POST':
         form = EventForm(request.POST)
         if form.is_valid():
@@ -86,17 +127,52 @@ def new_event(request):
                              context_instance=RequestContext(request))
 
 def archive(request):
+    """
+        Listing of all *future* events.
+
+        Template:
+            events/event_list.html
+
+        Context:
+            event_list
+            paginator
+            page_obj
+            is_paginated
+    """
     return list_detail.object_list(request,
                                    queryset=Event.objects.future().select_related().all(),
                                    template_object_name='event')
 
 def archive_year(request, year):
+    """
+        Listing of months that contain events in a given year.
+
+        Template:
+            events/event_archive_year.html
+
+        Context:
+            object_list
+            date_list
+            year
+    """
     return date_based.archive_year(request, year=year,
                                    queryset=Event.objects.all(),
                                    allow_future=True,
                                    date_field='start_date',)
 
 def archive_month(request, year, month):
+    """
+        Listing of all events in a given month.
+
+        Template:
+            events/event_archive_month.html
+
+        Context:
+            event_list
+            previous_month
+            next_month
+            month
+    """
     return date_based.archive_month(request, year=year, month=month,
                                     queryset=Event.objects.all(),
                                     date_field='start_date', month_format='%m',
