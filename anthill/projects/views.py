@@ -12,6 +12,15 @@ from brainstorm.models import Idea
 from feedinator.models import Feed
 
 def projects_and_ideas(request):
+    """
+        Combined view of latest projects mixed with ``brainstorm.models.Ideas``
+
+        Template: projects/projects_and_ideas.html
+
+        Context:
+            projects - Latest projects
+            ideas    - Latest ideas
+    """
     project_qs = Project.objects.select_related().order_by('-update_date').all()
     if hasattr(project_qs, '_gatekeeper'):
         project_qs = project_qs.approved()
@@ -21,6 +30,17 @@ def projects_and_ideas(request):
                               context_instance=RequestContext(request))
 
 def archive(request, projects='all'):
+    """
+        Paginated listing of ``Project``s.
+
+        Template: projects/projects_list.html
+
+        Context:
+            projects     - 'all'/'official'/'community'
+            project_list - list of projects
+
+            See ``django.views.generic.list_detail.object_list`` for pagination variables.
+    """
     qs = Project.objects.select_related().order_by('-update_date')
     if projects == 'official':
         qs = qs.filter(official=True)
@@ -33,6 +53,17 @@ def archive(request, projects='all'):
                        extra_context={'projects':projects}, paginate_by=10)
 
 def tag_archive(request, tag):
+    """
+        Paginated listing of ``Project``s by tag.
+
+        Template: projects/projects_list.html
+
+        Context:
+            tag          - tag being displayed
+            project_list - list of projects
+
+            See ``django.views.generic.list_detail.object_list`` for pagination variables.
+    """
     qs = Project.objects.select_related()
     if hasattr(qs, '_gatekeeper'):
         qs = qs.approved()
@@ -42,6 +73,14 @@ def tag_archive(request, tag):
                               allow_empty=True)
 
 def project_detail(request, slug):
+    """
+        Detail view of a ``Project``.
+
+        Template: projects/project_detail.html
+
+        Context:
+            project - ``Project`` instance
+    """
     # explicitly don't use _gatekeeper check here
     return object_detail(request,
                          queryset=Project.objects.select_related().all(),
@@ -49,6 +88,14 @@ def project_detail(request, slug):
 
 @login_required
 def new_project(request):
+    """
+        Creation of new project.
+
+        Template: projects/new_project.html
+
+        Context:
+            project_form - ``ProjectForm`` instance
+    """
     if request.method == 'GET':
         from_idea = request.GET.get('from_idea')
         if from_idea:
@@ -70,6 +117,18 @@ def new_project(request):
 
 @login_required
 def edit_project(request, slug):
+    """
+        Editing of existing project
+
+        Template: projects/edit_project.html
+
+        Context:
+            project      - ``Project`` instance being edited
+            project_form - ``ProjectForm`` instance
+            role_formset - ``RoleFormSet`` instance for project
+            link_formset - ``LinkFormSet`` instance for project
+            feed_formset - ``FeedFormSet`` instance for project
+    """
     qs = Project.objects.all()
     if hasattr(qs, '_gatekeeper'):
         qs = qs.approved()
@@ -128,6 +187,15 @@ def edit_project(request, slug):
 
 @login_required
 def join_project(request, slug):
+    """
+        Request to join a project.
+
+        Template: projects/join_project.html
+
+        Context:
+            project - Project user is requesting to join
+            form - ``JoinProjectForm`` instance
+    """
     qs = Project.objects.all()
     if hasattr(qs, '_gatekeeper'):
         qs = qs.approved()
@@ -164,6 +232,7 @@ def _user_on_project(project, user):
 @login_required
 @require_POST
 def add_ask(request, slug):
+    """ POST view for adding 'Asks' """
     project = get_object_or_404(Project, slug=slug)
     message = request.POST['message']
 
@@ -176,6 +245,7 @@ def add_ask(request, slug):
 @login_required
 @require_POST
 def delete_ask(request, id):
+    """ POST view for deleting 'Asks' """
     ask = get_object_or_404(Ask, pk=id)
     if _user_on_project(ask.project, request.user):
         ask.delete()
@@ -184,6 +254,16 @@ def delete_ask(request, id):
         return HttpResponseForbidden('Only project members may delete tasks')
 
 def ask_list(request):
+    """
+        Paginated listing of ``Ask``s.
+
+        Template: projects/ask_list.html
+
+        Context:
+            ask_list - list of asks
+
+            See ``django.views.generic.list_detail.object_list`` for pagination variables.
+    """
     return object_list(request,
                        queryset=Ask.objects.select_related().all(),
                        template_object_name='ask', allow_empty=True,

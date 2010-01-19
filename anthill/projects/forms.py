@@ -19,6 +19,7 @@ class FeedForm(forms.Form):
 FeedFormSet = formset_factory(FeedForm, can_delete=True, extra=1)
 
 def formfield_class_callback(field):
+    """ append a class with each field's name """
     ff = field.formfield()
     if ff:
         ff.widget.attrs['class'] = field.name
