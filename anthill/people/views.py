@@ -1,5 +1,6 @@
 from django.http import HttpResponse
 from django.conf import settings
+from django.contrib import messages
 from django.template import RequestContext
 from django.template.loader import render_to_string
 from django.shortcuts import redirect, render_to_response, get_object_or_404
@@ -102,7 +103,7 @@ def edit_profile(request):
             profile.about = form.cleaned_data['about']
             user.save()
             profile.save()
-            request.user.message_set.create(message='Saved profile changes.')
+            messages.success(request, 'Saved profile changes.')
     else:
         form = _user_to_profileform(request.user)
     return render_to_response('people/edit_profile.html', 
@@ -121,10 +122,10 @@ def change_password(request):
     if password_form.is_valid():
         user.set_password(password_form.cleaned_data['password1'])
         user.save()
-        user.message_set.create(message='Password changed.')
+        messages.success(request, 'Password changed.')
         password_form = PasswordForm()
     else:
-        user.message_set.create(message='Passwords did not match.')
+        messages.success(request, 'Passwords did not match.')
     return redirect('edit_profile')
 
 @login_required
@@ -142,12 +143,12 @@ def contact(request, username):
 
     # only users with a valid email can send email
     if not request.user.email:
-        request.user.message_set.create(message='You must set a valid email address prior to emailing other users.')
+        messages.warning(request, 'You must set a valid email address prior to emailing other users.')
         return redirect('edit_profile')
 
     # if this user can't send email inform them of the fact
     if not request.user.profile.can_send_email():
-        request.user.message_set.create(message='You have currently exceeded the message quota.  Please wait a few minutes before sending this message.')
+        messages.warning(request, 'You have currently exceeded the message quota.  Please wait a few minutes before sending this message.')
 
     if request.method == 'GET':
         form = UserContactForm()
@@ -162,7 +163,7 @@ def contact(request, username):
             message_sent.send(sender=request.user, subject=subject, body=body,
                               recipient=to_user)
             to_user.email_user(subject.strip(), body, request.user.email)
-            request.user.message_set.create(message='Your email has been delivered to %s' % (to_user.first_name or to_user.username))
+            messages.success(request, 'Your email has been delivered to %s' % (to_user.first_name or to_user.username))
             request.user.profile.record_email_sent()
             return redirect('user_profile', username)
 

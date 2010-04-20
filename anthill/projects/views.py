@@ -1,6 +1,7 @@
 from django.views.generic.list_detail import object_list, object_detail
 from django.shortcuts import render_to_response, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 from django.views.decorators.http import require_POST
 from django.http import HttpResponseForbidden
 from django.template import RequestContext
@@ -109,7 +110,7 @@ def new_project(request):
             project = project_form.save(commit=False)
             project.lead = request.user
             project.save()
-            request.user.message_set.create(message='Your project has been created.')
+            messages.success(request, 'Your project has been created.')
             return redirect('edit_project', project.slug)
     return render_to_response('projects/new_project.html',
                               {'project_form':project_form},
@@ -174,7 +175,7 @@ def edit_project(request, slug):
             del_ids = [f.cleaned_data['id'] for f in feed_formset.deleted_forms]
             Feed.objects.filter(pk__in=del_ids).delete()
 
-            request.user.message_set.create(message='Your changes have been saved.')
+            messages.success(request, 'Your changes have been saved.')
             return redirect(project)
 
     # display on GET or failed POST
@@ -206,7 +207,7 @@ def join_project(request, slug):
         form = JoinProjectForm(request.POST)
         if form.is_valid():
             if Role.objects.filter(user=request.user, project=project).count():
-                request.user.message_set.create(message='You already have a pending request to join this project.')
+                messages.error(request, 'You already have a pending request to join this project.')
             else:
                 role = Role.objects.create(user=request.user, project=project,
                                            message=form.cleaned_data['message'])
@@ -215,7 +216,7 @@ def join_project(request, slug):
                 body = render_to_string('projects/join_request_email.txt',
                                         {'project': project, 'role': role})
                 project.lead.email_user(subject, body)
-                request.user.message_set.create(message='Thank you for submitting your request to join %s' % project)
+                messages.success(request, 'Thank you for submitting your request to join %s' % project)
                 return redirect(project.get_absolute_url())
 
     return render_to_response('projects/join_project.html',
