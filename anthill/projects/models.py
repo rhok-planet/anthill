@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.contrib.contenttypes import generic
+from django.conf import settings
 from tagging.fields import TagField
 from markupfield.fields import MarkupField
 from brainstorm.models import Idea
@@ -53,20 +54,19 @@ class Role(models.Model):
 
     objects = RoleManager()
 
-SITE_LINK, SOURCE_LINK, DOCS_LINK, DOWNLOAD_LINK, EMAIL_LINK = range(5)
-LINK_TYPES = (
-    (SITE_LINK, 'website'),
-    (SOURCE_LINK, 'source'),
-    (DOCS_LINK, 'documentation'),
-    (DOWNLOAD_LINK, 'download'),
-    (EMAIL_LINK, 'email'),
+DEFAULT_LINK_TYPES = (
+    (0, 'website'),
+    (1, 'source'),
+    (2, 'documentation'),
+    (3, 'download'),
+    (4, 'email'),
 )
+LINK_TYPES = getattr(settings, 'ANTHILL_LINK_TYPES', DEFAULT_LINK_TYPES)
 
 class Link(models.Model):
     name = models.CharField(max_length=100)
     url = models.URLField()
-    link_type = models.PositiveSmallIntegerField(choices=LINK_TYPES, default=SITE_LINK)
-
+    link_type = models.PositiveSmallIntegerField(choices=LINK_TYPES, default=0)
     project = models.ForeignKey(Project, related_name='links')
 
     class Meta:
