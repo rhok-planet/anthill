@@ -211,7 +211,8 @@ def join_project(request, slug):
                 role = Role.objects.create(user=request.user, project=project,
                                            message=form.cleaned_data['message'])
 
-                subject = 'Sunlight Labs: Request to join project %s' % project
+                subject = render_to_string('projects/join_request_subject.txt',
+                                           {'project':project})
                 body = render_to_string('projects/join_request_email.txt',
                                         {'project': project, 'role': role})
                 project.lead.email_user(subject, body)
