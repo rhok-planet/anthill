@@ -1,16 +1,37 @@
 from django import forms
 from django.forms.formsets import formset_factory
 from django.forms.models import inlineformset_factory
+from django.template.defaultfilters import slugify
 from brainstorm.models import Idea
 from anthill.projects.models import Project, Link, Role
+
+def _slugify(name, Model):
+    base_slug = slugify(name)
+    slug = base_slug
+    n = 1
+    while Model.objects.filter(slug=slug).count():
+        slug = '%s-%s' % (base_slug, n)
+        n += 1
+    return slug
 
 class ProjectForm(forms.ModelForm):
     class Meta:
         model = Project
         fields = ['slug', 'name', 'description', 'tags', 'idea']
 
+    slug = forms.CharField(max_length=50, required=False)
     idea = forms.ModelChoiceField(required=False, queryset=Idea.objects.all(),
                                   widget=forms.widgets.HiddenInput())
+
+    def clean(self):
+        base_slug = self.cleaned_data['slug'] or slugify(name)
+        slug = base_slug
+        n = 1
+        while Project.objects.filter(slug=slug).count():
+            slug = '%s-%s' % (base_slug, n)
+            n += 1
+        self.cleaned_data['slug'] = slug
+        return self.cleaned_data
 
 class FeedForm(forms.Form):
     id = forms.IntegerField(required=False, widget=forms.HiddenInput())
