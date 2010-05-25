@@ -3,7 +3,7 @@
 from distutils.core import setup
 
 setup(name='anthill',
-      version='0.3.1',
+      version='0.4.0-dev',
       description='Django apps for running a community website, developed for sunlightlabs.com',
       author='James Turk',
       author_email='jturk@sunlightfoundation.com',

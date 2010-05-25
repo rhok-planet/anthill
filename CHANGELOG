@@ -2,11 +2,16 @@
 anthill changelog
 =================
 
+0.4.0
+===========================
+    - use django.contrib.messages (requires Django 1.2)
+
 0.3.1
 =======
     - customization improvements (ANTHILL_LINK_TYPES, ROLES)
         - template for email subject
     - dynamic slug generation for projects
+
 
 0.3.0
 ============================
